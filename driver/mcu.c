@@ -26,7 +26,7 @@
  * Implements functions for initializing global mcu specific features like the rcc.
  */
 
-#include "libopencm3/stm32/f1/rcc.h"
+#include <libopencm3/stm32/f1/rcc.h>
 
 #include "driver/mcu.h"
 
@@ -49,6 +49,6 @@
 void mcu_init(void)
 {
 	/* Initialize the microcontroller system. Initialize clocks. */
-	//rcc_clock_setup_in_hsi_out_64mhz();
+	rcc_clock_setup_in_hsi_out_64mhz();
 }
 

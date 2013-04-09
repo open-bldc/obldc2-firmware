@@ -35,3 +35,5 @@ test_blink.OBJECTS = \
 	test/blink_main.o
 
 OBJECTS += $(test_blink.OBJECTS)
+
+TARGETS += test_blink
