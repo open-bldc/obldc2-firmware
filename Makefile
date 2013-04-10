@@ -98,10 +98,14 @@ INCDIRS		= \
 	-I$(GOVERNOR_INC_DIR) \
 	-I$(INCDIR) \
 	-I$(STAGE_INC_DIR)
-CFLAGS          += $(INCDIRS) -Wall -Wextra -ansi -std=c99 -c \
-		  -fno-common -Os -g -mcpu=cortex-m3 -mthumb \
-		  -ffunction-sections -fdata-sections -msoft-float \
-		  -mfix-cortex-m3-ldrd -DSTM32F1
+
+ARCH_FLAGS      = -mthumb -mcpu=cortex-m3 -msoft-float
+
+CFLAGS          += $(INCDIRS) \
+		   $(ARCH_FLAGS) \
+		   -Wall -Wextra -ansi -std=c99 -c \
+		   -fno-common -Os -g -ffunction-sections \
+		   -fdata-sections -DSTM32F1
 CFLAGS          += $(CAN_PARAM)
 CFLAGS          += -DVERSION=\"$(VERSION)\"
 CFLAGS          += -DVERSION_SUFFIX=\"$(VERSION_SUFFIX)\"
@@ -109,13 +113,12 @@ CFLAGS          += -DBUILDDATE=\"$(BUILDDATE)\"
 CFLAGS          += -DPROJECT_NAME=\"$(NAME)\"
 CFLAGS          += -DCOPYRIGHT=\"$(COPYRIGHT)\"
 CFLAGS          += -DLICENSE=\"$(LICENSE)\"
-ASFLAGS         += -ahls -mapcs-32
 LDFLAGS         += -Tsrc/stm32.ld -nostartfiles -L$(TOOLCHAIN_LIB_DIR) -Os \
 		                    -L$(GOVERNOR_LIB_DIR) -Wl,--gc-sections \
 				    -L$(STAGE_LIB_DIR)
-LDFLAGS         += -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float
+LDFLAGS         += $(ARCH_FLAGS)
 LDLIBS          += -lopencm3_stm32f1 -lc -lnosys -lgcc
-#-lgovernor 
+#LDLIBS          += -lgovernor 
 CPFLAGS         += -j .isr_vector -j .text -j .data
 ODFLAGS         += -S
 SIZEFLAGS       += -A -x
