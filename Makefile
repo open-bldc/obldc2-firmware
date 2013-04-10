@@ -113,7 +113,7 @@ ASFLAGS         += -ahls -mapcs-32
 LDFLAGS         += -Tsrc/stm32.ld -nostartfiles -L$(TOOLCHAIN_LIB_DIR) -Os \
 		                    -L$(GOVERNOR_LIB_DIR) -Wl,--gc-sections \
 				    -L$(STAGE_LIB_DIR)
-LDFLAGS         += -mthumb -march=armv7 -mfix-cortex-m3-ldrd -msoft-float
+LDFLAGS         += -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float
 LDLIBS          += -lopencm3_stm32f1 -lc -lnosys -lgcc
 #-lgovernor 
 CPFLAGS         += -j .isr_vector -j .text -j .data
