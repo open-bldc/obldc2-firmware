@@ -37,3 +37,11 @@ test_blink.OBJECTS = \
 OBJECTS += $(test_blink.OBJECTS)
 
 TARGETS += test_blink
+
+test_sys_tick.OBJECTS = \
+	test/sys_tick_main.o \
+	driver/sys_tick.o
+
+OBJECTS += $(test_sys_tick.OBJECTS)
+
+TARGETS += test_sys_tick
