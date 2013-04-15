@@ -40,7 +40,6 @@ static void sys_tick_timer_callback_one_shot(int id);
 void sys_tick_timer_callback(int id) {
     id = id;
 
-    TOGGLE(LED_GREEN);
     (void)sys_tick_timer_register(sys_tick_timer_callback_one_shot, 1000);
 }
 
@@ -76,6 +75,6 @@ int main(void) {
         while (!sys_tick_check_timer(timer, 500)) {
             __asm("nop");
         }
-        // TOGGLE(LED_ORANGE);
+        TOGGLE(LED_GREEN);
     }
 }
