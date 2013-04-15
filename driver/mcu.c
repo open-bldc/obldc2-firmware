@@ -30,25 +30,11 @@
 
 #include "driver/mcu.h"
 
-/* 
- * Expanding clock configuration settings from the board settings into the
- * apropriate function name. Yes C macro language is really really retarded and
- * needs three macros to achieve that incredible feat.
- *
- * Why can't I just write directy in the system init function something like this, or similar? >_< :
- *
- * rcc_clock_setup_in_hse_ ## BOARD__HSE ## _out_ ## BOARD__SYS_CLK ## ();
- */
-#define __RCC_CLOCK_SETUP(__HSE, __SYS_CLK) rcc_clock_setup_in_hse_##__HSE##_out_##__SYS_CLK
-#define _RCC_CLOCK_SETUP(_HSE, _SYS_CLK) __RCC_CLOCK_SETUP(_HSE, _SYS_CLK)
-#define RCC_CLOCK_SETUP _RCC_CLOCK_SETUP(BOARD__HSE, BOARD__SYS_CLK)
-
 /**
  * Initialize STM32 system specific subsystems.
  */
-void mcu_init(void)
-{
-	/* Initialize the microcontroller system. Initialize clocks. */
-	rcc_clock_setup_in_hsi_out_64mhz();
+void mcu_init(void) {
+    /* Initialize the microcontroller system. Initialize clocks. */
+    rcc_clock_setup_in_hsi_out_64mhz();
 }
 

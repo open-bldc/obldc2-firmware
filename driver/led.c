@@ -34,21 +34,18 @@
 /**
  * Initialize LED reletated peripherals.
  */
-void led_init(void)
-{
+void led_init(void) {
+    /* GPIOB clock enable */
+    rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
+    rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_AFIOEN);
 
-	/* GPIOB clock enable */
-  rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
-  rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_AFIOEN);
+    /* GPIOB: Green and Red LED pin as output push-pull */
+    gpio_set(GPIOB, GPIO4);
+    gpio_set(GPIOB, GPIO5);
+    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
+      GPIO_CNF_OUTPUT_OPENDRAIN, GPIO4);
+    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
+      GPIO_CNF_OUTPUT_OPENDRAIN, GPIO5);
 
-	/* GPIOB: Green and Red LED pin as output push-pull */
-  gpio_set(GPIOB, GPIO4);
-  gpio_set(GPIOB, GPIO5);
-  gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
-                GPIO_CNF_OUTPUT_OPENDRAIN, GPIO4);
-  gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
-                GPIO_CNF_OUTPUT_OPENDRAIN, GPIO5);
-
-  AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_FULL_SWJ_NO_JNTRST;
-
+    AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_FULL_SWJ_NO_JNTRST;
 }

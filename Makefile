@@ -66,7 +66,7 @@ OD		= $(PREFIX)-objdump
 SIZE		= $(PREFIX)-size
 GDB		= $(PREFIX)-gdb
 OOCD		= openocd
-LINT		= splint
+LINT		= $(TOPDIR)/scripts/cpplint.py
 OLCONFGEN	= $(shell which olconfgen > /dev/null && echo olconfgen || echo $(TOPDIR)/../var/stage/bin/olconfgen)
 
 COMPILER = $(shell which $(CC))
@@ -95,6 +95,7 @@ INCDIRS		= \
 	-I. \
 	-Isrc \
 	-Itest \
+	-Iext/libopencm3/include \
 	-I$(GOVERNOR_INC_DIR) \
 	-I$(INCDIR) \
 	-I$(STAGE_INC_DIR)
@@ -123,12 +124,7 @@ CPFLAGS         += -j .isr_vector -j .text -j .data
 ODFLAGS         += -S
 SIZEFLAGS       += -A -x
 
-LINTFLAGS	+= +quiet \
-		  $(INCDIRS) \
-		  -I$(TOOLCHAIN_INC_DIR) \
-		  -systemdirs $(TOOLCHAIN_INC_DIR) \
-		  -D__GNUC__ \
-		  -temptrans
+LINTFLAGS	+= 
 
 ###############################################################################
 # Edit after this point only when you really know what you are doing!!!
