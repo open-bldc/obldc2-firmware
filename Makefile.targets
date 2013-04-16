@@ -53,3 +53,12 @@ test_usart.OBJECTS = \
 OBJECTS += $(test_usart.OBJECTS)
 
 TARGETS += test_usart
+
+test_governor.OBJECTS = \
+	test/governor_main.o \
+	test/gprot_test_governor.o \
+	driver/usart.o
+
+OBJECTS += $(test_governor.OBJECTS)
+
+TARGETS += test_governor

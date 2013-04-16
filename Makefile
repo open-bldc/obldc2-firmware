@@ -32,7 +32,7 @@
 
 NAME		?= open-bldc
 VERSION          = 0.1-beta
-COPYRIGHT        = 'Copyright (C) 2010-2011 Piotr Esden-Tempski <piotr@esden.net>'
+COPYRIGHT        = 'Copyright (C) 2009-2013 Piotr Esden-Tempski <piotr@esden.net>'
 LICENSE          = 'License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>'
 PREFIX		?= arm-none-eabi
 OOCD_INTERFACE	?= flossjtag
@@ -73,10 +73,8 @@ COMPILER = $(shell which $(CC))
 TOOLCHAIN_DIR = $(shell dirname $(COMPILER))/..
 TOOLCHAIN_LIB_DIR = $(TOOLCHAIN_DIR)/$(PREFIX)/lib
 TOOLCHAIN_INC_DIR = $(TOOLCHAIN_DIR)/$(PREFIX)/include
-GOVERNOR_LIB_DIR = $(TOOLCHAIN_DIR)/lib
-GOVERNOR_INC_DIR = $(TOOLCHAIN_DIR)/include
-STAGE_LIB_DIR = $(TOPDIR)/../var/stage/arm-none-eabi/lib
-STAGE_INC_DIR = $(TOPDIR)/../var/stage/arm-none-eabi/include
+STAGE_LIB_DIR = ext/stage/lib
+STAGE_INC_DIR = ext/stage/include
 ifdef CAN_ADDR
 CAN_PARAM = -DCAN_ADDR=$(CAN_ADDR)
 else
@@ -96,7 +94,6 @@ INCDIRS		= \
 	-Isrc \
 	-Itest \
 	-Iext/libopencm3/include \
-	-I$(GOVERNOR_INC_DIR) \
 	-I$(INCDIR) \
 	-I$(STAGE_INC_DIR)
 
@@ -115,11 +112,11 @@ CFLAGS          += -DPROJECT_NAME=\"$(NAME)\"
 CFLAGS          += -DCOPYRIGHT=\"$(COPYRIGHT)\"
 CFLAGS          += -DLICENSE=\"$(LICENSE)\"
 LDFLAGS         += -Tsrc/stm32.ld -nostartfiles -L$(TOOLCHAIN_LIB_DIR) -Os \
-		                    -L$(GOVERNOR_LIB_DIR) -Wl,--gc-sections \
+		                    -Wl,--gc-sections \
 				    -L$(STAGE_LIB_DIR)
 LDFLAGS         += $(ARCH_FLAGS)
 LDLIBS          += -lopencm3_stm32f1 -lc -lnosys -lgcc
-#LDLIBS          += -lgovernor 
+LDLIBS          += -lgovernor 
 CPFLAGS         += -j .isr_vector -j .text -j .data
 ODFLAGS         += -S
 SIZEFLAGS       += -A -x
