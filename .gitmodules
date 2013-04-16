@@ -1,3 +1,6 @@
 [submodule "ext/libopencm3"]
 	path = ext/libopencm3
 	url = https://github.com/libopencm3/libopencm3.git
+[submodule "ext/libgovernor"]
+	path = ext/libgovernor
+	url = https://github.com/open-bldc/libgovernor.git
