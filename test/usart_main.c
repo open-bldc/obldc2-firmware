@@ -30,14 +30,14 @@
 #include "driver/led.h"
 #include "driver/usart.h"
 
-int8_t buffer[5];
+uint8_t buffer[5];
 int buffer_fill = 0;
 bool buffer_full = false;
 
 /**
  * USART byte handler function
  */
-int usart_handle_byte(int8_t byte) {
+int usart_handle_byte(uint8_t byte) {
     if (!buffer_full) {
         buffer[buffer_fill++] = byte;
         if (buffer_fill == 5) {
