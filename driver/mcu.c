@@ -19,7 +19,6 @@
 /**
  * @file   mcu.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
- * @date   Mar 18 2011
  *
  * @brief  mcu "driver" implementation.
  *

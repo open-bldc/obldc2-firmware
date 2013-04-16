@@ -19,7 +19,6 @@
 /**
  * @file   sys_tick.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
- * @date   Tue Aug 17 02:02:50 2010
  *
  * @brief  Sys Tick based soft timer driver implementation
  *

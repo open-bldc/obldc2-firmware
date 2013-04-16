@@ -19,7 +19,6 @@
 /**
  * @file   blink_main.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
- * @date   Tue Aug 17 01:47:20 2010
  *
  * @brief  Blink test implementation
  *

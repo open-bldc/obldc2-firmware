@@ -19,7 +19,6 @@
 /**
  * @file   led.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
- * @date   Tue Aug 17 02:03:55 2010
  *
  * @brief  LED driver implementation
  *

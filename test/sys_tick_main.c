@@ -19,7 +19,6 @@
 /**
  * @file   sys_tick_main.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
- * @date   Tue Aug 17 01:41:29 2010
  *
  * @brief  Sys Tick soft timer test implementation.
  *
