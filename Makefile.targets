@@ -45,3 +45,11 @@ test_sys_tick.OBJECTS = \
 OBJECTS += $(test_sys_tick.OBJECTS)
 
 TARGETS += test_sys_tick
+
+test_usart.OBJECTS = \
+	test/usart_main.o \
+	driver/usart.o
+
+OBJECTS += $(test_usart.OBJECTS)
+
+TARGETS += test_usart
