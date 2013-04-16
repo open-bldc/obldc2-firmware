@@ -53,8 +53,8 @@ int usart_handle_byte(int8_t byte) {
 /**
  * USART byte send handler function
  */
-int16_t usart_get_byte(void) {
-    int16_t ret = -1;
+int32_t usart_get_byte(void) {
+    int32_t ret = -1;
 
     if (buffer_full) {
         ret = buffer[--buffer_fill];

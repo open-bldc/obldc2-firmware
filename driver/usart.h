@@ -22,7 +22,7 @@
 #include <stdint.h>
 
 typedef int (*usart_handle_byte_callback_t)(int8_t byte);
-typedef int16_t (*usart_get_byte_callback_t)(void);
+typedef int32_t (*usart_get_byte_callback_t)(void);
 
 void usart_init(usart_handle_byte_callback_t handle_byte_callback, usart_get_byte_callback_t get_byte_callback);
 void usart_enable_send(void);
