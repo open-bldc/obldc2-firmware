@@ -67,7 +67,6 @@ SIZE		= $(PREFIX)-size
 GDB		= $(PREFIX)-gdb
 OOCD		= openocd
 LINT		= $(TOPDIR)/scripts/cpplint.py
-OLCONFGEN	= $(shell which olconfgen > /dev/null && echo olconfgen || echo $(TOPDIR)/../var/stage/bin/olconfgen)
 
 COMPILER = $(shell which $(CC))
 TOOLCHAIN_DIR = $(shell dirname $(COMPILER))/..
@@ -298,10 +297,6 @@ check_params_exist:
 	else \
 		echo "exists and not missing."; \
 	fi
-
-$(INCDIR)/config.h: $(TOPDIR)/../conf/$(TARGET)-config.yaml
-	@echo "  OC    $@"
-	$(Q)$(OLCONFGEN) $< > $@
 
 # Suffix rules
 
