@@ -110,12 +110,15 @@ CFLAGS          += -DBUILDDATE=\"$(BUILDDATE)\"
 CFLAGS          += -DPROJECT_NAME=\"$(NAME)\"
 CFLAGS          += -DCOPYRIGHT=\"$(COPYRIGHT)\"
 CFLAGS          += -DLICENSE=\"$(LICENSE)\"
-LDFLAGS         += -Tsrc/stm32.ld -nostartfiles -L$(TOOLCHAIN_LIB_DIR) -Os \
+CFLAGS          += $($(TARGET).CFLAGS)
+LDFLAGS         += -Tsrc/stm32.ld -nostartfiles -Os \
 		                    -Wl,--gc-sections \
 				    -L$(STAGE_LIB_DIR)
 LDFLAGS         += $(ARCH_FLAGS)
-LDLIBS          += -lopencm3_stm32f1 -lc -lnosys -lgcc
-LDLIBS          += -lgovernor 
+LDFLAGS         += $($(TARGET).LDFLAGS)
+LDLIBS          += -lopencm3_stm32f1 -lc -lgcc
+LDLIBS          += -lgovernor
+LDLIBS		+= $($(TARGET).LDLIBS)
 CPFLAGS         += -j .isr_vector -j .text -j .data
 ODFLAGS         += -S
 SIZEFLAGS       += -A -x
@@ -131,6 +134,24 @@ LINTFLAGS	+=
 .SUFFIXES: .elf .bin .hex .srec .lst
 .SECONDEXPANSION:
 .SECONDARY:
+
+# Semihosting machinery
+ifeq ($($(TARGET).SEMIHOSTING),1)
+SEMIHOSTING ?= 1
+else
+SEMIHOSTING ?= 0
+endif
+
+ifeq ($(SEMIHOSTING),1)
+$(info **** Semihosting enabled!!! ****)
+CFLAGS          += -DSEMIHOSTING=1
+LDLIBS          += --specs=rdimon.specs -lrdimon
+else
+CFLAGS          += -DSEMIHOSTING=0
+LDLIBS          += -lnosys
+endif
+
+# Targets
 
 all: $(patsubst %,%.all,$(TARGETS))
 

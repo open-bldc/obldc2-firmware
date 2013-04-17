@@ -62,3 +62,12 @@ test_governor.OBJECTS = \
 OBJECTS += $(test_governor.OBJECTS)
 
 TARGETS += test_governor
+
+test_semihost.OBJECTS = \
+	test/semihost_main.o
+
+test_semihost.SEMIHOSTING = 1
+
+OBJECTS += $(test_semihost.OBJECTS)
+
+TARGETS += test_semihost
