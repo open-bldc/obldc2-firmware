@@ -71,3 +71,11 @@ test_semihost.SEMIHOSTING = 1
 OBJECTS += $(test_semihost.OBJECTS)
 
 TARGETS += test_semihost
+
+test_pwm_comm.OBJECTS = \
+	test/pwm_comm_main.o \
+	driver/pwm.o
+
+OBJECTS += $(test_pwm_comm.OBJECTS)
+
+TARGETS += test_pwm_comm
