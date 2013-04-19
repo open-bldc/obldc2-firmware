@@ -79,3 +79,11 @@ test_pwm_comm.OBJECTS = \
 OBJECTS += $(test_pwm_comm.OBJECTS)
 
 TARGETS += test_pwm_comm
+
+test_pwm_duty.OBJECTS = \
+	test/pwm_duty_main.o \
+	driver/pwm.o
+
+OBJECTS += $(test_pwm_duty.OBJECTS)
+
+TARGETS += test_pwm_duty
