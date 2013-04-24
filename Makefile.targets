@@ -87,3 +87,12 @@ test_pwm_duty.OBJECTS = \
 OBJECTS += $(test_pwm_duty.OBJECTS)
 
 TARGETS += test_pwm_duty
+
+test_adc.OBJECTS = \
+	test/adc_main.o \
+	driver/adc.o \
+	driver/pwm.o
+
+OBJECTS += $(test_adc.OBJECTS)
+
+TARGETS += test_adc
