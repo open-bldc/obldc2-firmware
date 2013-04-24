@@ -59,28 +59,87 @@
 #define ADC_CHAN_CURRENT 4
 
 /* ADC configuration. */
-#define ADC_SAMPLE_COUNT 8
+#define ADC_RAW_SAMPLE_COUNT 8*2
+#define ADC_SAMPLE_TIME ADC_SMPR_SMP_7DOT5CYC
 
-static const uint8_t const adc1_channel_array[ADC_SAMPLE_COUNT] = {
+static const uint8_t const adc1_channel_array[ADC_RAW_SAMPLE_COUNT] = {
 	ADC_CHAN_U_VOLTAGE,
 	ADC_CHAN_V_VOLTAGE,
 	ADC_CHAN_W_VOLTAGE,
 	ADC_CHAN_V_BATT,
+	ADC_CHAN_V_VOLTAGE,
+	ADC_CHAN_W_VOLTAGE,
+	ADC_CHAN_U_VOLTAGE,
+	ADC_CHAN_V_BATT
+};
+
+static const uint8_t const adc2_channel_array[ADC_RAW_SAMPLE_COUNT] = {
+	ADC_CHAN_V_VOLTAGE,
+	ADC_CHAN_W_VOLTAGE,
+	ADC_CHAN_U_VOLTAGE,
+	ADC_CHAN_CURRENT,
 	ADC_CHAN_U_VOLTAGE,
 	ADC_CHAN_V_VOLTAGE,
 	ADC_CHAN_W_VOLTAGE,
 	ADC_CHAN_CURRENT
 };
 
+#define ADC_RAW_A1_UV1 0
+#define ADC_RAW_A2_VV1 1
+#define ADC_RAW_A1_VV1 2
+#define ADC_RAW_A2_WV1 3
+#define ADC_RAW_A1_WV1 4
+#define ADC_RAW_A2_UV1 5
+#define ADC_RAW_A1_VB1 6
+#define ADC_RAW_A2_CU1 7
+
+#define ADC_RAW_A1_VV2 8
+#define ADC_RAW_A2_UV2 9
+#define ADC_RAW_A1_WV2 10
+#define ADC_RAW_A2_VV2 11
+#define ADC_RAW_A1_UV2 12
+#define ADC_RAW_A2_WV2 13
+#define ADC_RAW_A1_VB2 14
+#define ADC_RAW_A2_CU2 15
+
 /* Define local state. */
 struct adc_state {
-	uint32_t raw_data[ADC_SAMPLE_COUNT];
+	uint32_t dma_transfer_error_counter;
+	uint16_t raw_data[ADC_RAW_SAMPLE_COUNT];
 } adc_state;
+
+/**
+ * Configure a specific adc.
+ */
+void adc_config(uint32_t adc, const uint8_t const *channel_array) {
+	adc_enable_scan_mode(adc);
+	adc_set_continuous_conversion_mode(adc);
+	adc_set_right_aligned(adc);
+	adc_enable_external_trigger_regular(adc, ADC_CR2_EXTSEL_SWSTART);
+	adc_set_sample_time_on_all_channels(adc, ADC_SAMPLE_TIME);
+	adc_enable_dma(adc);
+
+	adc_power_on(adc);
+
+	{
+		int i;
+		for (i=0; i<800000; i++) /* Wait a bit for the adc to power on. */
+			__asm("nop");
+	}
+
+	adc_reset_calibration(adc);
+	adc_calibration(adc);
+
+	adc_set_regular_sequence(adc, ADC_RAW_SAMPLE_COUNT/2, (uint8_t *)channel_array);
+}
 
 /**
  * Initialize analog to digital converter
  */
 void adc_init(void) {
+	/* Reset adc_state. */
+	adc_state.dma_transfer_error_counter = 0;
+
 	/* Initialize peripheral clocks. */
 	rcc_peripheral_enable_clock(&RCC_AHBENR, RCC_AHBENR_DMA1EN);
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPAEN);
@@ -106,7 +165,7 @@ void adc_init(void) {
 
 	dma_set_peripheral_address(DMA1, DMA_CHANNEL1, (uint32_t)&ADC1_DR);
 	dma_set_memory_address(DMA1, DMA_CHANNEL1, (uint32_t)adc_state.raw_data);
-	dma_set_number_of_data(DMA1, DMA_CHANNEL1, ADC_SAMPLE_COUNT);
+	dma_set_number_of_data(DMA1, DMA_CHANNEL1, ADC_RAW_SAMPLE_COUNT/2);
 	dma_set_read_from_peripheral(DMA1, DMA_CHANNEL1);
 	dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL1);
 	dma_enable_circular_mode(DMA1, DMA_CHANNEL1);
@@ -124,33 +183,17 @@ void adc_init(void) {
 	nvic_set_priority(NVIC_DMA1_CHANNEL1_IRQ, 0);
 	nvic_enable_irq(NVIC_DMA1_CHANNEL1_IRQ);
 
-	/* Disable ADC1. */
+	/* Disable ADC's. */
 	adc_off(ADC1);
+	adc_off(ADC2);
 
-	/* Configure dualmode. */
-	//adc_set_dual_mode(ADC_CR1_DUALMOD_RSM); /* Dualmode regular only. */
+	/* Enable dualmode. */
+	adc_set_dual_mode(ADC_CR1_DUALMOD_RSM); /* Dualmode regular only. */
 
-	/* Configure ADC1. */
-	adc_enable_scan_mode(ADC1);
-	adc_set_continuous_conversion_mode(ADC1);
-	adc_set_right_aligned(ADC1);
-	adc_enable_external_trigger_regular(ADC1, ADC_CR2_EXTSEL_SWSTART);
-	adc_set_sample_time_on_all_channels(ADC1, ADC_SMPR_SMP_7DOT5CYC);
-	adc_enable_dma(ADC1);
+	adc_config(ADC1, adc1_channel_array);
+	adc_config(ADC2, adc2_channel_array);
 
-	adc_power_on(ADC1);
-
-	{
-		int i;
-		for (i=0; i<800000; i++) /* Wait a bit for the adc to power on. */
-			__asm("nop");
-	}
-
-	adc_reset_calibration(ADC1);
-	adc_calibration(ADC1);
-
-	adc_set_regular_sequence(ADC1, ADC_SAMPLE_COUNT, (uint8_t *)adc1_channel_array);
-
+	/* Start converting. */
 	adc_start_conversion_regular(ADC1);
 }
 
