@@ -20,7 +20,7 @@
  * @file   mcu.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
  *
- * @brief  mcu "driver" implementation.
+ * @brief  mcu driver implementation.
  *
  * Implements functions for initializing global mcu specific features like the rcc.
  */

@@ -17,10 +17,10 @@
  */
 
 /**
- * @file   blink_main.c
+ * @file   pwm_duty_main.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
  *
- * @brief  Blink test implementation
+ * @brief  PWM duty cycle test implementation
  *
  */
 
@@ -45,7 +45,7 @@ static void my_delay(uint32_t delay) {
 }
 
 /**
- * Blink test main function
+ * PWM duty cycle test main function
  *
  * @return Nothing really...
  */

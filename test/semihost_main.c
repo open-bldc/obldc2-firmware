@@ -17,7 +17,7 @@
  */
 
 /**
- * @file   usart_main.c
+ * @file   semihost_main.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
  *
  * @brief  Semihosting test implementation.

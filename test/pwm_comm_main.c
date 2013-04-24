@@ -17,10 +17,10 @@
  */
 
 /**
- * @file   blink_main.c
+ * @file   pwm_comm_main.c
  * @author Piotr Esden-Tempski <piotr@esden.net>
  *
- * @brief  Blink test implementation
+ * @brief  PWM commutation test implementation
  *
  */
 
