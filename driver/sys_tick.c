@@ -44,6 +44,11 @@
 #define SYS_TICK_TIMER_NUM 5
 
 /**
+ * Resolution (in us) of the global timer counter.
+ */
+#define SYS_TICK_RESOLUTION 100
+
+/**
  * Private global sys tick counter.
  */
 static uint32_t sys_tick_global_counter = 0;
@@ -70,7 +75,7 @@ void sys_tick_init(void) {
 
     /* Setup SysTick Timer for 100uSec Interrupts */
     systick_set_clocksource(STK_CTRL_CLKSOURCE_AHB);
-    systick_set_reload((64000000 / 10000) - 1);
+    systick_set_reload((64000000 / (1000000 / SYS_TICK_RESOLUTION)) - 1);
     systick_interrupt_enable();
 
     for (i = 0; i < SYS_TICK_TIMER_NUM; i++) {
@@ -99,12 +104,12 @@ uint32_t sys_tick_get_timer(void) {
  * Check actively if a certain time elapsed.
  *
  * @param timer Timer aquired using @ref sys_tick_get_timer()
- * @param time Time delay to check against.
+ * @param time Time delay (in us) to check against.
  *
  * @return 0 if the time did not elapse yet, 1 if the time elapsed.
  */
 bool sys_tick_check_timer(uint32_t timer, uint32_t time) {
-    if ((sys_tick_global_counter - timer) > time) {
+    if ((sys_tick_global_counter - timer) >= (time / SYS_TICK_RESOLUTION)) {
         return true;
     } else {
         return false;
@@ -115,7 +120,7 @@ bool sys_tick_check_timer(uint32_t timer, uint32_t time) {
  * Register a soft timer callback.
  *
  * @param callback Callback function that should be called after a time elapses.
- * @param time Delay to wait for.
+ * @param time Delay (in us) to wait for.
  *
  * @return ID of the soft timer, or -1 if no slots available.
  */
