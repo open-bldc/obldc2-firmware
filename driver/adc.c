@@ -84,28 +84,12 @@ static const uint8_t const adc2_channel_array[ADC_RAW_SAMPLE_COUNT] = {
 	ADC_CHAN_CURRENT
 };
 
-#define ADC_RAW_A1_UV1 0
-#define ADC_RAW_A2_VV1 1
-#define ADC_RAW_A1_VV1 2
-#define ADC_RAW_A2_WV1 3
-#define ADC_RAW_A1_WV1 4
-#define ADC_RAW_A2_UV1 5
-#define ADC_RAW_A1_VB1 6
-#define ADC_RAW_A2_CU1 7
-
-#define ADC_RAW_A1_VV2 8
-#define ADC_RAW_A2_UV2 9
-#define ADC_RAW_A1_WV2 10
-#define ADC_RAW_A2_VV2 11
-#define ADC_RAW_A1_UV2 12
-#define ADC_RAW_A2_WV2 13
-#define ADC_RAW_A1_VB2 14
-#define ADC_RAW_A2_CU2 15
-
 /* Define local state. */
 struct adc_state {
 	uint32_t dma_transfer_error_counter;
 	uint16_t raw_data[ADC_RAW_SAMPLE_COUNT];
+	adc_callback_t half_transfer_callback;
+	adc_callback_t transfer_complete_callback;
 } adc_state;
 
 /**
@@ -136,9 +120,12 @@ void adc_config(uint32_t adc, const uint8_t const *channel_array) {
 /**
  * Initialize analog to digital converter
  */
-void adc_init(void) {
+void adc_init(adc_callback_t half_transfer_callback,
+              adc_callback_t transfer_complete_callback) {
 	/* Reset adc_state. */
 	adc_state.dma_transfer_error_counter = 0;
+	adc_state.half_transfer_callback = half_transfer_callback;
+	adc_state.transfer_complete_callback = transfer_complete_callback;
 
 	/* Initialize peripheral clocks. */
 	rcc_peripheral_enable_clock(&RCC_AHBENR, RCC_AHBENR_DMA1EN);
@@ -190,6 +177,7 @@ void adc_init(void) {
 	/* Enable dualmode. */
 	adc_set_dual_mode(ADC_CR1_DUALMOD_RSM); /* Dualmode regular only. */
 
+	/* Configure the adc channels. */
 	adc_config(ADC1, adc1_channel_array);
 	adc_config(ADC2, adc2_channel_array);
 
@@ -198,16 +186,20 @@ void adc_init(void) {
 }
 
 void dma1_channel1_isr(void) {
+
+	/* Half dma transfer interrupt. */
 	if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL1, DMA_HTIF)) {
-		ON(LED_RED);
+		if (adc_state.half_transfer_callback)
+			adc_state.half_transfer_callback(false, adc_state.raw_data);
 	} 
 
 	if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL1, DMA_TCIF)) {
-		OFF(LED_RED);
+		if (adc_state.transfer_complete_callback)
+			adc_state.transfer_complete_callback(true, adc_state.raw_data);
 	}
 
 	if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL1, DMA_TEIF)) {
-		TOGGLE(LED_GREEN);
+		adc_state.dma_transfer_error_counter++;
 	}
 
 	dma_clear_interrupt_flags(DMA1, DMA_CHANNEL1, DMA_FLAGS);

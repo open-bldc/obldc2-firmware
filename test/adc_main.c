@@ -29,6 +29,36 @@
 #include "driver/adc.h"
 #include "driver/pwm.h"
 
+uint32_t uv, vv, wv;
+
+/**
+ * ADC transfer callback implementation.
+ *
+ * This function is being called by the ADC driver from the DMA transfer/half
+ * transfer complete interrupt.
+ */
+void adc_transfer_callback(bool transfer_complete, uint16_t *raw_data) {
+    if (transfer_complete) {
+        OFF(LED_RED);
+        /* Simple IIR filter on the three phase voltage measurements. */
+        uv = ((uv << 2) + raw_data[ADC_RAW_A1_UV1]
+                        + raw_data[ADC_RAW_A2_UV1])/6;
+        vv = ((vv << 2) + raw_data[ADC_RAW_A1_VV1]
+                        + raw_data[ADC_RAW_A2_VV1])/6;
+        wv = ((wv << 2) + raw_data[ADC_RAW_A1_VV1]
+                        + raw_data[ADC_RAW_A2_VV1])/6;
+    } else {
+        ON(LED_RED);
+        /* Simple IIR filter on the three phase voltage measurements. */
+        uv = ((uv << 2) + raw_data[ADC_RAW_A1_UV2]
+                        + raw_data[ADC_RAW_A2_UV2])/6;
+        vv = ((vv << 2) + raw_data[ADC_RAW_A1_VV2]
+                        + raw_data[ADC_RAW_A2_VV2])/6;
+        wv = ((wv << 2) + raw_data[ADC_RAW_A1_VV2]
+                        + raw_data[ADC_RAW_A2_VV2])/6;
+    }
+}
+
 /**
  * ADC test main function
  *
@@ -37,10 +67,19 @@
 int main(void) {
     mcu_init();
     led_init();
-    adc_init();
-    pwm_init();
+    adc_init(adc_transfer_callback, adc_transfer_callback);
+    pwm_init(); /* Initializing pwm to make sure the phases are floating. */
+
+    uv = 0;
+    vv = 0;
+    wv = 0;
 
     while (true) {
-        __asm("nop");
+        /* Switch on green led if the voltage on phase U exceeds 1000 counts. */
+        if (uv > 1000) {
+            ON(LED_GREEN);
+        } else {
+            OFF(LED_GREEN);
+        }
     }
 }
