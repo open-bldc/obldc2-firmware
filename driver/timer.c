@@ -26,6 +26,7 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #include <libopencm3/stm32/f1/rcc.h>
@@ -43,6 +44,7 @@ struct timer_entry {
     volatile uint16_t next_invocation;
     volatile uint16_t delta_ticks;
     timer_callback_t callback;
+    volatile bool oneshot;
 };
 
 /* Internal state. */
@@ -60,6 +62,7 @@ void timer_init(void)
         timer_state.entry[i].next_invocation = 0;
         timer_state.entry[i].delta_ticks = 0;
         timer_state.entry[i].callback = NULL;
+        timer_state.entry[i].oneshot = false;
     }
 
     /* Enable clock for TIM subsystem */
@@ -171,7 +174,7 @@ void timer_init(void)
 
 }
 
-int timer_register(uint16_t delta_ticks, timer_callback_t callback) {
+int timer_register(uint16_t delta_ticks, timer_callback_t callback, bool oneshot) {
     int timer_id = -1;
     uint16_t now = timer_get_counter(TIM2);
 
@@ -184,6 +187,7 @@ int timer_register(uint16_t delta_ticks, timer_callback_t callback) {
             timer_state.entry[i].callback = callback;
             timer_state.entry[i].next_invocation = now + delta_ticks;
             timer_state.entry[i].delta_ticks = delta_ticks;
+            timer_state.entry[i].oneshot = oneshot;
             timer_set_oc_value(TIM2, i * 2, now + delta_ticks);
             timer_enable_irq(TIM2, 1 << (i + 1));
             timer_id = i;
@@ -220,10 +224,16 @@ void tim2_isr(void)
         else
             timer_disable_irq(TIM2, TIM_DIER_CC1IE);
 
-        /* Update last invocation time. */
-        timer_state.entry[0].next_invocation += timer_state.entry[0].delta_ticks;
+        if (timer_state.entry[0].oneshot) {
+            /* We are done stop interrupt. */
+            timer_disable_irq(TIM2, TIM_DIER_CC1IE);
+            timer_state.entry[0].callback = NULL;
+        } else {
+            /* Update last invocation time. */
+            timer_state.entry[0].next_invocation += timer_state.entry[0].delta_ticks;
 
-        timer_set_oc_value(TIM2, TIM_OC1, timer_state.entry[0].next_invocation);
+            timer_set_oc_value(TIM2, TIM_OC1, timer_state.entry[0].next_invocation);
+        }
     }
 
     if (timer_get_flag(TIM2, TIM_SR_CC2IF)) {
@@ -235,10 +245,16 @@ void tim2_isr(void)
         else
             timer_disable_irq(TIM2, TIM_DIER_CC2IE);
 
-        /* Update last invocation time. */
-        timer_state.entry[1].next_invocation += timer_state.entry[1].delta_ticks;
+        if (timer_state.entry[1].oneshot) {
+            /* We are done stop interrupt. */
+            timer_disable_irq(TIM2, TIM_DIER_CC2IE);
+            timer_state.entry[1].callback = NULL;
+        } else {
+            /* Update last invocation time. */
+            timer_state.entry[1].next_invocation += timer_state.entry[1].delta_ticks;
 
-        timer_set_oc_value(TIM2, TIM_OC2, timer_state.entry[1].next_invocation);
+            timer_set_oc_value(TIM2, TIM_OC2, timer_state.entry[1].next_invocation);
+        }
     }
 
     if (timer_get_flag(TIM2, TIM_SR_CC3IF)) {
@@ -250,10 +266,16 @@ void tim2_isr(void)
         else
             timer_disable_irq(TIM2, TIM_DIER_CC3IE);
 
-        /* Update last invocation time. */
-        timer_state.entry[2].next_invocation += timer_state.entry[2].delta_ticks;
+        if (timer_state.entry[2].oneshot) {
+            /* We are done stop interrupt. */
+            timer_disable_irq(TIM2, TIM_DIER_CC3IE);
+            timer_state.entry[2].callback = NULL;
+        } else {
+            /* Update last invocation time. */
+            timer_state.entry[2].next_invocation += timer_state.entry[2].delta_ticks;
 
-        timer_set_oc_value(TIM2, TIM_OC3, timer_state.entry[2].next_invocation);
+            timer_set_oc_value(TIM2, TIM_OC3, timer_state.entry[2].next_invocation);
+        }
     }
 
     if (timer_get_flag(TIM2, TIM_SR_CC4IF)) {
@@ -265,9 +287,15 @@ void tim2_isr(void)
         else
             timer_disable_irq(TIM2, TIM_DIER_CC4IE);
 
-        /* Update last invocation time. */
-        timer_state.entry[3].next_invocation += timer_state.entry[3].delta_ticks;
+        if (timer_state.entry[3].oneshot) {
+            /* We are done stop interrupt. */
+            timer_disable_irq(TIM2, TIM_DIER_CC4IE);
+            timer_state.entry[3].callback = NULL;
+        } else {
+            /* Update last invocation time. */
+            timer_state.entry[3].next_invocation += timer_state.entry[3].delta_ticks;
 
-        timer_set_oc_value(TIM2, TIM_OC4, timer_state.entry[3].next_invocation);
+            timer_set_oc_value(TIM2, TIM_OC4, timer_state.entry[3].next_invocation);
+        }
     }
 }

@@ -33,10 +33,19 @@
 static void timer_callback(int id, uint16_t time);
 
 /**
- * One shot callback from the soft Sys Tick timer
+ * Callback from the timer to disable the led.
  */
-void timer_callback(__attribute__((unused)) int id, __attribute__((unused)) uint16_t time) {
-    TOGGLE(LED_RED);
+void timer_callback_off(__attribute__((unused)) int id, __attribute__((unused)) uint16_t time) {
+    OFF(LED_RED);
+}
+
+/**
+ * Callback from the timer to enable the led.
+ */
+void timer_callback_on(__attribute__((unused)) int id, __attribute__((unused)) uint16_t time) {
+    ON(LED_RED);
+
+    timer_register(100, timer_callback_off, true);
 }
 
 /**
@@ -49,7 +58,7 @@ int main(void) {
     timer_init();
 
     /* 1kHz timer callback. */
-    (void)timer_register(4000, timer_callback);
+    (void)timer_register(4000, timer_callback_on, false);
 
     while (true) {
         __asm("nop");
