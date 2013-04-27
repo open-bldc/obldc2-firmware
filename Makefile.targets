@@ -96,3 +96,11 @@ test_adc.OBJECTS = \
 OBJECTS += $(test_adc.OBJECTS)
 
 TARGETS += test_adc
+
+test_timer.OBJECTS = \
+	test/timer_main.o \
+	driver/timer.o
+
+OBJECTS += $(test_timer.OBJECTS)
+
+TARGETS += test_timer
