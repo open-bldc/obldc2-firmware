@@ -13,6 +13,14 @@ Supporting only the strip hardware but reusing some of the features and tools co
 
 This repository only contains the firmwre for the motor controller. If there are libraries used they will be included as submodules in the future. (just like libopencm3 is included currently).
 
+How to build
+------------
+
+1) Build external modules
+$ ./scripts/buildext.sh
+2) Build firmware
+$ make
+
 Licensing
 ---------
 All sourcecode is licensed under GPL version 3 or later, all circuitry designs
