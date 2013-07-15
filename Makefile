@@ -31,9 +31,9 @@
 ################################################################################
 
 NAME		?= open-bldc
-VERSION          = 0.1-beta
-COPYRIGHT        = 'Copyright (C) 2009-2013 Piotr Esden-Tempski <piotr@esden.net>'
-LICENSE          = 'License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>'
+VERSION		:= 0.1-beta
+COPYRIGHT	:= 'Copyright (C) 2009-2013 Piotr Esden-Tempski <piotr@esden.net>'
+LICENSE		:= 'License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>'
 PREFIX		?= arm-none-eabi
 OOCD_INTERFACE	?= flossjtag
 OOCD_TARGET	?= open-bldc
@@ -43,19 +43,19 @@ OOCD_SERIAL	?=
 # Set the BMP_PORT to a serial port and then BMP is used for flashing
 BMP_PORT	?=
 # Set to 1 to get plain gdb terminal without text user interface.
-DEBUG_PLAIN     ?= 0
+DEBUG_PLAIN	?= 0
 
 # Set to 1 to go into verbose mode
 VERBOSE		?= 0
 
 # Use 'make VERBOSE=1' for more debug output.
 ifneq ($(VERBOSE),1)
-Q := @
+Q		:= @
 else
-LDFLAGS += -Wl,--print-gc-sections
+LDFLAGS		+= -Wl,--print-gc-sections
 endif
 
-TOPDIR = $(shell pwd)
+TOPDIR		= $(shell pwd)
 
 CC		= $(PREFIX)-gcc
 LD		= $(PREFIX)-gcc
@@ -66,7 +66,8 @@ OD		= $(PREFIX)-objdump
 SIZE		= $(PREFIX)-size
 GDB		= $(PREFIX)-gdb
 OOCD		= openocd
-LINT		= $(TOPDIR)/scripts/cpplint.py
+LINT		= splint
+STYLECHECK	:= ./scripts/checkpatch.pl
 
 COMPILER = $(shell which $(CC))
 TOOLCHAIN_DIR = $(shell dirname $(COMPILER))/..
@@ -89,41 +90,43 @@ INCDIR		= $(BUILDDIR)/include
 DEPDIR		= build/dep
 
 INCDIRS		= \
-	-I. \
-	-Isrc \
-	-Itest \
-	-Iext/libopencm3/include \
-	-I$(INCDIR) \
-	-I$(STAGE_INC_DIR)
+		-I. \
+		-Isrc \
+		-Itest \
+		-Iext/libopencm3/include \
+		-I$(INCDIR) \
+		-I$(STAGE_INC_DIR)
 
-ARCH_FLAGS      = -mthumb -mcpu=cortex-m3 -msoft-float
+ARCH_FLAGS	= -mthumb -mcpu=cortex-m3 -msoft-float
 
-CFLAGS          += $(INCDIRS) \
+CFLAGS		+= $(INCDIRS) \
 		   $(ARCH_FLAGS) \
 		   -Wall -Wextra -ansi -std=c99 -c \
 		   -fno-common -Os -g -ffunction-sections \
 		   -fdata-sections -DSTM32F1
-CFLAGS          += $(CAN_PARAM)
-CFLAGS          += -DVERSION=\"$(VERSION)\"
-CFLAGS          += -DVERSION_SUFFIX=\"$(VERSION_SUFFIX)\"
-CFLAGS          += -DBUILDDATE=\"$(BUILDDATE)\"
-CFLAGS          += -DPROJECT_NAME=\"$(NAME)\"
-CFLAGS          += -DCOPYRIGHT=\"$(COPYRIGHT)\"
-CFLAGS          += -DLICENSE=\"$(LICENSE)\"
-CFLAGS          += $($(TARGET).CFLAGS)
-LDFLAGS         += -Tsrc/stm32.ld -nostartfiles -Os \
-		                    -Wl,--gc-sections \
-				    -L$(STAGE_LIB_DIR)
-LDFLAGS         += $(ARCH_FLAGS)
-LDFLAGS         += $($(TARGET).LDFLAGS)
-LDLIBS          += -lopencm3_stm32f1 -lc -lgcc
-LDLIBS          += -lgovernor
+CFLAGS		+= $(CAN_PARAM)
+CFLAGS		+= -DVERSION=\"$(VERSION)\"
+CFLAGS		+= -DVERSION_SUFFIX=\"$(VERSION_SUFFIX)\"
+CFLAGS		+= -DBUILDDATE=\"$(BUILDDATE)\"
+CFLAGS		+= -DPROJECT_NAME=\"$(NAME)\"
+CFLAGS		+= -DCOPYRIGHT=\"$(COPYRIGHT)\"
+CFLAGS		+= -DLICENSE=\"$(LICENSE)\"
+CFLAGS		+= $($(TARGET).CFLAGS)
+LDFLAGS		+= -Tsrc/stm32.ld -nostartfiles -Os \
+		   -Wl,--gc-sections \
+		   -L$(STAGE_LIB_DIR)
+LDFLAGS		+= $(ARCH_FLAGS)
+LDFLAGS		+= $($(TARGET).LDFLAGS)
+LDLIBS		+= -lopencm3_stm32f1 -lc -lgcc
+LDLIBS		+= -lgovernor
 LDLIBS		+= $($(TARGET).LDLIBS)
-CPFLAGS         += -j .isr_vector -j .text -j .data
-ODFLAGS         += -S
-SIZEFLAGS       += -A -x
+CPFLAGS		+= -j .isr_vector -j .text -j .data
+ODFLAGS		+= -S
+SIZEFLAGS	+= -A -x
 
-LINTFLAGS	+= 
+LINTFLAGS	+= -systemdirs "ext/stage/include:ext/libopencm3/include" \
+		   -Iext/stage/include -Iext/libopencm3/include -I. -DSTM32F1
+STYLECHECKFLAGS += --no-tree -f --terse --mailback
 
 ###############################################################################
 # Edit after this point only when you really know what you are doing!!!
@@ -144,22 +147,42 @@ endif
 
 ifeq ($(SEMIHOSTING),1)
 $(info **** Semihosting enabled!!! ****)
-CFLAGS          += -DSEMIHOSTING=1
-LDLIBS          += --specs=rdimon.specs -lrdimon
+CFLAGS		+= -DSEMIHOSTING=1
+LDLIBS		+= --specs=rdimon.specs -lrdimon
 else
-CFLAGS          += -DSEMIHOSTING=0
-LDLIBS          += -lnosys
+CFLAGS		+= -DSEMIHOSTING=0
+LDLIBS		+= -lnosys
 endif
 
 # Targets
 
-all: $(patsubst %,%.all,$(TARGETS))
+all: ext $(patsubst %,%.all,$(TARGETS))
+
+ext:
+	$(MAKE) -C ext
 
 lint: $(patsubst %,%.lint,$(TARGETS))
+
+STYLECHECKFILES := $(shell find . ! -path "./ext/*" -and -name '*.[ch]')
+
+stylecheck: $(STYLECHECKFILES:=.stylecheck)
+stylecheckclean: $(STYLECHECKFILES:=.stylecheckclean)
+
+%.stylecheck:
+	$(Q)$(STYLECHECK) $(STYLECHECKFLAGS) $* > $*.stylecheck; \
+	if [ -s $*.stylecheck ]; then \
+		cat $*.stylecheck; \
+	else \
+		rm -f $*.stylecheck; \
+	fi;
+
+%.stylecheckclean:
+	$(Q)rm -f $*.stylecheck;
 
 clean:
 	@echo "Cleaning up everything"
 	$(Q)rm -rf build
+	$(MAKE) -C ext clean
 
 flash: $(DEFAULT_TARGET).flash
 debug: $(DEFAULT_TARGET).debug
@@ -169,8 +192,8 @@ ifdef TARGET
 	@echo "*** Finished building $* target ***"
 else
 %.all: $$(*).target_exists
-	make TARGET=$(*) check_params
-	make TARGET=$(*) CHECKED_PARAMS=true $(*).all
+	$(MAKE) TARGET=$(*) check_params
+	$(MAKE) TARGET=$(*) CHECKED_PARAMS=true $(*).all
 endif
 
 $(BINDIR)/%.images: $(BINDIR)/%.bin $(BINDIR)/%.hex $(BINDIR)/%.srec $(BINDIR)/%.lst
@@ -268,7 +291,7 @@ halt:
 		    -c "reset halt" \
 		    -c shutdown
 
-.PHONY: doc
+.PHONY: doc stylecheck
 doc:
 	@mkdir -p doc
 	@doxygen doxygen.conf > /dev/null
@@ -349,7 +372,7 @@ $(DEPDIR)/%.d: %.c
 	$(Q)cp -f $@ $@.tmp
 	$(Q)sed -e 's|.*:|build/$$(TARGET)/obj/$*.o:|' < $@.tmp > $@
 	$(Q)sed -e 's/.*://' -e 's/\\$$//' < $@.tmp | fmt -1 | \
-	 sed -e 's/^ *//' -e 's/$$/:/' >> $@
+	    sed -e 's/^ *//' -e 's/$$/:/' >> $@
 	$(Q)rm -f $@.tmp
 
 # include header dependency information
