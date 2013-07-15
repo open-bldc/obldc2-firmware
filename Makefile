@@ -168,7 +168,7 @@ STYLECHECKFILES := $(shell find . ! -path "./ext/*" -and -name '*.[ch]')
 stylecheck: $(STYLECHECKFILES:=.stylecheck)
 stylecheckclean: $(STYLECHECKFILES:=.stylecheckclean)
 
-%.stylecheck:
+%.stylecheck: %
 	$(Q)$(STYLECHECK) $(STYLECHECKFLAGS) $* > $*.stylecheck; \
 	if [ -s $*.stylecheck ]; then \
 		cat $*.stylecheck; \
@@ -291,7 +291,7 @@ halt:
 		    -c "reset halt" \
 		    -c shutdown
 
-.PHONY: doc stylecheck
+.PHONY: doc stylecheck stylecheckclean clean
 doc:
 	@mkdir -p doc
 	@doxygen doxygen.conf > /dev/null
