@@ -1,2 +1,4 @@
 *.o
+*.stylecheck
+ext/stage
 build
