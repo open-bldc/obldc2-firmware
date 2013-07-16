@@ -39,7 +39,7 @@ static void gprot_trigger_output(void *data);
 static void gprot_register_changed(void *data, u8 addr);
 static void gprot_get_version(void *data);
 
-static bool gprot_get_version_triggered = false;
+static bool gprot_get_version_triggered;
 
 #ifndef PROJECT_NAME
 #define PROJECT_NAME "null"
@@ -69,7 +69,8 @@ static bool gprot_get_version_triggered = false;
 #define LICENSE "null"
 #endif
 
-#define FIRMWARE_VERSION "\n" PROJECT_NAME " " TARGET " firmware " VERSION VERSION_SUFFIX ", build " BUILDDATE "\n"
+#define FIRMWARE_VERSION "\n" PROJECT_NAME " " TARGET " firmware " \
+			 VERSION VERSION_SUFFIX ", build " BUILDDATE "\n"
 #define FIRMWARE_COPYRIGHT COPYRIGHT "\n"
 #define FIRMWARE_LICENSE LICENSE "\n"
 
@@ -82,7 +83,8 @@ static u16 test_regs[32];
 /**
  * Initialize the Governor protocol subsystem.
  */
-void gprot_init() {
+void gprot_init()
+{
 	int i;
 
 	(void)gpc_init(gprot_trigger_output, 0, gprot_register_changed, 0);
@@ -106,7 +108,8 @@ void gprot_init() {
  *
  * @param data Passthrough data of the callback. (ignored here)
  */
-void gprot_trigger_output(void *data) {
+void gprot_trigger_output(void *data)
+{
 	data = data;
 	TOGGLE(LED_RED);
 	usart_enable_send();
@@ -118,7 +121,8 @@ void gprot_trigger_output(void *data) {
  * @param data Passthrough data to the callback.
  * @param addr Address of the register that changed.
  */
-void gprot_register_changed(void *data, u8 addr) {
+void gprot_register_changed(void *data, u8 addr)
+{
 	data = data;
 	addr = addr;
 }
@@ -128,7 +132,8 @@ void gprot_register_changed(void *data, u8 addr) {
  *
  * @param data Passthrough data to the callback.
  */
-void gprot_get_version(void *data) {
+void gprot_get_version(void *data)
+{
 	data = data;
 
 	gprot_get_version_triggered = true;
@@ -137,7 +142,8 @@ void gprot_get_version(void *data) {
 /**
  * Userspace process handling the get version event.
  */
-void gprot_get_version_process(void) {
+void gprot_get_version_process(void)
+{
 	if (gprot_get_version_triggered) {
 		gprot_get_version_triggered = false;
 		gpc_send_string(FIRMWARE_VERSION, sizeof(FIRMWARE_VERSION));

@@ -59,7 +59,7 @@
 #define ADC_CHAN_CURRENT 4
 
 /* ADC configuration. */
-#define ADC_RAW_SAMPLE_COUNT 8*2
+#define ADC_RAW_SAMPLE_COUNT (8 * 2)
 #define ADC_SAMPLE_TIME ADC_SMPR_SMP_7DOT5CYC
 
 static const uint8_t const adc1_channel_array[ADC_RAW_SAMPLE_COUNT] = {
@@ -95,7 +95,8 @@ struct adc_state {
 /**
  * Configure a specific adc.
  */
-void adc_config(uint32_t adc, const uint8_t const *channel_array) {
+void adc_config(uint32_t adc, const uint8_t const *channel_array)
+{
 	adc_enable_scan_mode(adc);
 	adc_set_continuous_conversion_mode(adc);
 	adc_set_right_aligned(adc);
@@ -107,21 +108,25 @@ void adc_config(uint32_t adc, const uint8_t const *channel_array) {
 
 	{
 		int i;
-		for (i=0; i<800000; i++) /* Wait a bit for the adc to power on. */
+		/* Wait a bit for the adc to power on. */
+		for (i = 0; i < 800000; i++) {
 			__asm("nop");
+		}
 	}
 
 	adc_reset_calibration(adc);
 	adc_calibration(adc);
 
-	adc_set_regular_sequence(adc, ADC_RAW_SAMPLE_COUNT/2, (uint8_t *)channel_array);
+	adc_set_regular_sequence(adc, ADC_RAW_SAMPLE_COUNT/2,
+				 (uint8_t *)channel_array);
 }
 
 /**
  * Initialize analog to digital converter
  */
 void adc_init(adc_callback_t half_transfer_callback,
-              adc_callback_t transfer_complete_callback) {
+	      adc_callback_t transfer_complete_callback)
+{
 	/* Reset adc_state. */
 	adc_state.dma_transfer_error_counter = 0;
 	adc_state.half_transfer_callback = half_transfer_callback;
@@ -134,24 +139,26 @@ void adc_init(adc_callback_t half_transfer_callback,
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_ADC2EN);
 
 	/* Initialize the ADC input GPIO. */
-	/* WARNING: this code is written to work with strip. On the strip hardware
-	 * we are lucky and all the ADC channels are on the same bank so we can
-	 * initialize all of them in one go. This code will need to be
-	 * changed/improved if we ever have to support hardware that has the ADC's
-	 * spread over more then one bank.
+	/* WARNING: this code is written to work with strip. On the strip
+	 * hardware we are lucky and all the ADC channels are on the same bank
+	 * so we can initialize all of them in one go. This code will need to be
+	 * changed/improved if we ever have to support hardware that has the
+	 * ADC's spread over more then one bank.
 	 */
 	gpio_set_mode(ADC_BANK, GPIO_MODE_INPUT,
-				  GPIO_CNF_INPUT_ANALOG, ADC_PORT_U_VOLTAGE |
-				  						 ADC_PORT_V_VOLTAGE |
-				  						 ADC_PORT_W_VOLTAGE |
-				  						 ADC_PORT_V_BATT |
-				  						 ADC_PORT_CURRENT);
+		      GPIO_CNF_INPUT_ANALOG, ADC_PORT_U_VOLTAGE |
+		      ADC_PORT_V_VOLTAGE |
+		      ADC_PORT_W_VOLTAGE |
+		      ADC_PORT_V_BATT |
+		      ADC_PORT_CURRENT);
 
 	/* Configure DMA for data aquisition. */
-	dma_channel_reset(DMA1, DMA_CHANNEL1); /* Channel 1 reacts to: ADC1, TIM2_CH3 and TIM4_CH1 */
+	/* Channel 1 reacts to: ADC1, TIM2_CH3 and TIM4_CH1 */
+	dma_channel_reset(DMA1, DMA_CHANNEL1);
 
 	dma_set_peripheral_address(DMA1, DMA_CHANNEL1, (uint32_t)&ADC1_DR);
-	dma_set_memory_address(DMA1, DMA_CHANNEL1, (uint32_t)adc_state.raw_data);
+	dma_set_memory_address(DMA1, DMA_CHANNEL1,
+			       (uint32_t)adc_state.raw_data);
 	dma_set_number_of_data(DMA1, DMA_CHANNEL1, ADC_RAW_SAMPLE_COUNT/2);
 	dma_set_read_from_peripheral(DMA1, DMA_CHANNEL1);
 	dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL1);
@@ -185,17 +192,22 @@ void adc_init(adc_callback_t half_transfer_callback,
 	adc_start_conversion_regular(ADC1);
 }
 
-void dma1_channel1_isr(void) {
+void dma1_channel1_isr(void)
+{
 
 	/* Half dma transfer interrupt. */
 	if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL1, DMA_HTIF)) {
-		if (adc_state.half_transfer_callback)
-			adc_state.half_transfer_callback(false, adc_state.raw_data);
-	} 
+		if (adc_state.half_transfer_callback) {
+			adc_state.half_transfer_callback(false,
+							 adc_state.raw_data);
+		}
+	}
 
 	if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL1, DMA_TCIF)) {
-		if (adc_state.transfer_complete_callback)
-			adc_state.transfer_complete_callback(true, adc_state.raw_data);
+		if (adc_state.transfer_complete_callback) {
+			adc_state.transfer_complete_callback(true,
+							    adc_state.raw_data);
+		}
 	}
 
 	if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL1, DMA_TEIF)) {

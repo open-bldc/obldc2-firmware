@@ -36,11 +36,12 @@
  *
  * @param delay "time" to wait
  */
-static void my_delay(uint32_t delay) {
-    while (delay != 0) {
-        delay--;
-        __asm("nop");
-    }
+static void my_delay(uint32_t delay)
+{
+	while (delay != 0) {
+		delay--;
+		__asm("nop");
+	}
 }
 
 /**
@@ -48,15 +49,16 @@ static void my_delay(uint32_t delay) {
  *
  * @param id LED id
  */
-static void led_on(int id) {
-    switch (id) {
-        case 0:
-        ON(LED_RED);
-        break;
-        case 1:
-        ON(LED_GREEN);
-        break;
-    }
+static void led_on(int id)
+{
+	switch (id) {
+	case 0:
+		ON(LED_RED);
+		break;
+	case 1:
+		ON(LED_GREEN);
+		break;
+	}
 }
 
 /**
@@ -64,15 +66,16 @@ static void led_on(int id) {
  *
  * @param id LED id
  */
-static void led_off(int id) {
-    switch (id) {
-        case 0:
-        OFF(LED_RED);
-        break;
-        case 1:
-        OFF(LED_GREEN);
-        break;
-    }
+static void led_off(int id)
+{
+	switch (id) {
+	case 0:
+		OFF(LED_RED);
+		break;
+	case 1:
+		OFF(LED_GREEN);
+		break;
+	}
 }
 
 /**
@@ -80,33 +83,34 @@ static void led_off(int id) {
  *
  * @return Nothing really...
  */
-int main(void) {
-    int i, j, led_id;
+int main(void)
+{
+	int i, j, led_id;
 
-    mcu_init();
-    led_init();
+	mcu_init();
+	led_init();
 
-    led_id = 0;
+	led_id = 0;
 
-    while (true) {
-        for (j = 0; j < 20; j++) {
-            for (i = 0; i < 125; i++) {
-                led_on(led_id);
-                my_delay((uint32_t)(50 * j));
-                led_off(led_id);
-                my_delay((uint32_t)(1200 - 50 * j));
-            }
-        }
-        for (j = 0; j < 20; j++) {
-            for (i = 0; i < 125; i++) {
-                led_off(led_id);
-                my_delay((uint32_t)(200 + 50 * j));
-                led_on(led_id);
-                my_delay((uint32_t)(1000 - 50 * j));
-            }
-        }
-        led_off(led_id);
-        led_id++;
-        led_id %= 2;
-    }
+	while (true) {
+		for (j = 0; j < 20; j++) {
+			for (i = 0; i < 125; i++) {
+				led_on(led_id);
+				my_delay((uint32_t)(50 * j));
+				led_off(led_id);
+				my_delay((uint32_t)(1200 - 50 * j));
+			}
+		}
+		for (j = 0; j < 20; j++) {
+			for (i = 0; i < 125; i++) {
+				led_off(led_id);
+				my_delay((uint32_t)(200 + 50 * j));
+				led_on(led_id);
+				my_delay((uint32_t)(1000 - 50 * j));
+			}
+		}
+		led_off(led_id);
+		led_id++;
+		led_id %= 2;
+	}
 }

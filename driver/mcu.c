@@ -22,7 +22,8 @@
  *
  * @brief  mcu driver implementation.
  *
- * Implements functions for initializing global mcu specific features like the rcc.
+ * Implements functions for initializing global mcu specific features like
+ * the rcc.
  */
 
 #include <libopencm3/stm32/f1/rcc.h>
@@ -32,8 +33,9 @@
 /**
  * Initialize STM32 system specific subsystems.
  */
-void mcu_init(void) {
-    /* Initialize the microcontroller system. Initialize clocks. */
-    rcc_clock_setup_in_hsi_out_64mhz();
+void mcu_init(void)
+{
+	/* Initialize the microcontroller system. Initialize clocks. */
+	rcc_clock_setup_in_hsi_out_64mhz();
 }
 

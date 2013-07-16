@@ -43,6 +43,6 @@
 typedef void (*adc_callback_t)(bool transfer_complete, uint16_t *raw_data);
 
 void adc_init(adc_callback_t half_transfer_callback,
-              adc_callback_t transfer_complete_callback);
+	      adc_callback_t transfer_complete_callback);
 
 #endif /* __ADC_H */

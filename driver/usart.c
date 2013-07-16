@@ -52,44 +52,45 @@ usart_get_byte_callback_t usart_get_byte_callback;
  * USART driver initialization.
  */
 void usart_init(usart_handle_byte_callback_t handle_byte_callback,
-                usart_get_byte_callback_t get_byte_callback) {
-    /* initialize callback pointers */
-    usart_handle_byte_callback = handle_byte_callback;
-    usart_get_byte_callback = get_byte_callback;
+		usart_get_byte_callback_t get_byte_callback)
+{
+	/* initialize callback pointers */
+	usart_handle_byte_callback = handle_byte_callback;
+	usart_get_byte_callback = get_byte_callback;
 
-    /* enable clock for USART1 peripherial */
-    rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
-    rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_AFIOEN);
-    rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_USART1EN);
+	/* enable clock for USART1 peripherial */
+	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
+	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_AFIOEN);
+	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_USART1EN);
 
-    /* Enable the USART1 interrupts */
-    nvic_enable_irq(NVIC_USART1_IRQ);
+	/* Enable the USART1 interrupts */
+	nvic_enable_irq(NVIC_USART1_IRQ);
 
-    /* enable USART1 pin software remapping */
-    AFIO_MAPR |= AFIO_MAPR_USART1_REMAP;
+	/* enable USART1 pin software remapping */
+	AFIO_MAPR |= AFIO_MAPR_USART1_REMAP;
 
-    /* GPIOB: USART1 Tx push-pull */
-    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
-                  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_RE_TX);
+	/* GPIOB: USART1 Tx push-pull */
+	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
+		      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_RE_TX);
 
-    /* GPIOB: USART1 Rx pin as floating input */
-    gpio_set_mode(GPIOB, GPIO_MODE_INPUT,
-                  GPIO_CNF_INPUT_FLOAT, GPIO_USART1_RE_RX);
+	/* GPIOB: USART1 Rx pin as floating input */
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT,
+		      GPIO_CNF_INPUT_FLOAT, GPIO_USART1_RE_RX);
 
-    /* Initialize the usart subsystem */
-    usart_set_baudrate(USART1, 57600);
-    usart_set_databits(USART1, 8);
-    usart_set_stopbits(USART1, USART_STOPBITS_1);
-    usart_set_parity(USART1, USART_PARITY_NONE);
-    usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
-    usart_set_mode(USART1, USART_MODE_RX | USART_MODE_TX);
+	/* Initialize the usart subsystem */
+	usart_set_baudrate(USART1, 57600);
+	usart_set_databits(USART1, 8);
+	usart_set_stopbits(USART1, USART_STOPBITS_1);
+	usart_set_parity(USART1, USART_PARITY_NONE);
+	usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
+	usart_set_mode(USART1, USART_MODE_RX | USART_MODE_TX);
 
-    /* Enable USART1 Receive and Transmit interrupts */
-    USART_CR1(USART1) |= USART_CR1_RXNEIE;
-    //USART_CR1(USART1) |= USART_CR1_TXEIE;
+	/* Enable USART1 Receive and Transmit interrupts */
+	USART_CR1(USART1) |= USART_CR1_RXNEIE;
+	/*USART_CR1(USART1) |= USART_CR1_TXEIE;*/
 
-    /* Enable the USART1 */
-    usart_enable(USART1);
+	/* Enable the USART1 */
+	usart_enable(USART1);
 }
 
 /**
@@ -97,7 +98,7 @@ void usart_init(usart_handle_byte_callback_t handle_byte_callback,
  */
 void usart_enable_send(void)
 {
-    USART_CR1(USART1) |= USART_CR1_TXEIE;
+	USART_CR1(USART1) |= USART_CR1_TXEIE;
 }
 
 /**
@@ -105,7 +106,7 @@ void usart_enable_send(void)
  */
 void usart_disable_send(void)
 {
-    USART_CR1(USART1) &= ~USART_CR1_TXEIE;
+	USART_CR1(USART1) &= ~USART_CR1_TXEIE;
 }
 
 /**
@@ -114,28 +115,33 @@ void usart_disable_send(void)
 void usart1_isr(void)
 {
 
-    /* input (RX) handler */
-    if ((USART_SR(USART1) & USART_SR_RXNE) != 0) {
-        data_buf = usart_recv(USART1);
+	/* input (RX) handler */
+	if ((USART_SR(USART1) & USART_SR_RXNE) != 0) {
+		data_buf = usart_recv(USART1);
 
-        if (usart_handle_byte_callback) {
-            if (usart_handle_byte_callback((int8_t)data_buf) != 0) {
-                /* huston we have a problem with the parsing engine... */
-                /* TODO: report that to the error logging, messaging, whatever engine */
-            }
-        }
-    }
+		if (usart_handle_byte_callback) {
+			if (usart_handle_byte_callback((int8_t)data_buf)) {
+				/* huston we have a problem with the
+				 * parsing engine...
+				*/
+				/* TODO: report that to the error logging,
+				 * messaging, whatever engine.
+				 */
+			}
+		}
+	}
 
-    /* output (TX) handler */
-    if ((USART_SR(USART1) & USART_SR_TXE) != 0) {
-        if (usart_get_byte_callback) {
-            if ((data_buf = usart_get_byte_callback()) >= 0) {
-                usart_send(USART1, (uint16_t)data_buf);
-            } else {
-                usart_disable_send();
-            }
-        } else {
-            usart_disable_send();
-        }
-    }
+	/* output (TX) handler */
+	if ((USART_SR(USART1) & USART_SR_TXE) != 0) {
+		if (usart_get_byte_callback) {
+			data_buf = usart_get_byte_callback();
+			if (data_buf >= 0) {
+				usart_send(USART1, (uint16_t)data_buf);
+			} else {
+				usart_disable_send();
+			}
+		} else {
+			usart_disable_send();
+		}
+	}
 }

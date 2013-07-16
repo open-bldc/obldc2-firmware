@@ -30,6 +30,9 @@
 #include "driver/mcu.h"
 #include "driver/led.h"
 
+/*
+ * We need to declare it here because there is no header for this.
+ */
 void initialise_monitor_handles(void);
 
 /**
@@ -39,27 +42,28 @@ void initialise_monitor_handles(void);
  *
  * @param delay "time" to wait
  */
-static void my_delay(uint32_t delay) {
-    while (delay != 0) {
-        delay--;
-        __asm("nop");
-    }
+static void my_delay(uint32_t delay)
+{
+	while (delay != 0) {
+		delay--;
+		__asm("nop");
+	}
 }
 
 /**
  * Semihosting test main function
  */
-int main(void) {
-
-    mcu_init();
-    led_init();
+int main(void)
+{
+	mcu_init();
+	led_init();
 
 #if SEMIHOSTING
-    initialise_monitor_handles();
+	initialise_monitor_handles();
 #endif
 
-    while (1) {
-        printf("Hello from semihosting.\n");
-        my_delay(10000000);
-    }
+	while (1) {
+		printf("Hello from semihosting.\n");
+		my_delay(10000000);
+	}
 }

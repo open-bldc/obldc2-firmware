@@ -25,7 +25,8 @@
 typedef void (*timer_callback_t)(int timer_id, uint16_t time);
 
 void timer_init(void);
-int timer_register(uint16_t delta_ticks, timer_callback_t callback, bool oneshot);
+int timer_register(uint16_t delta_ticks, timer_callback_t callback,
+		   bool oneshot);
 void timer_unregister(int timer_id);
 void timer_modify_delta(int timer_id, uint16_t delta_ticks);
 

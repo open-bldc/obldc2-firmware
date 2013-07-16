@@ -28,7 +28,7 @@
 #define TOGGLE(PORT_PIN) {						\
 		if (gpio_get(PORT_PIN##_PORT, PORT_PIN##_PIN) != 0) {	\
 			ON(PORT_PIN);					\
-		}else{							\
+		} else {						\
 			OFF(PORT_PIN);					\
 		}							\
 	}

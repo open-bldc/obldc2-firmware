@@ -24,7 +24,8 @@
 typedef int (*usart_handle_byte_callback_t)(uint8_t byte);
 typedef int32_t (*usart_get_byte_callback_t)(void);
 
-void usart_init(usart_handle_byte_callback_t handle_byte_callback, usart_get_byte_callback_t get_byte_callback);
+void usart_init(usart_handle_byte_callback_t handle_byte_callback,
+		usart_get_byte_callback_t get_byte_callback);
 void usart_enable_send(void);
 void usart_disable_send(void);
 

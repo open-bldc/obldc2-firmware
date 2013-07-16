@@ -36,44 +36,45 @@ static void sys_tick_timer_callback_one_shot(int id);
 /**
  * Callback from the soft sys tick timer
  */
-void sys_tick_timer_callback(int id) {
-    id = id;
-
-    (void)sys_tick_timer_register(sys_tick_timer_callback_one_shot, 100000);
+void sys_tick_timer_callback(int id)
+{
+	(void)sys_tick_timer_register(sys_tick_timer_callback_one_shot,
+				      100000);
 }
 
 /**
  * One shot callback from the soft Sys Tick timer
  */
-void sys_tick_timer_callback_one_shot(int id) {
-    static int state = 0;
-    if (state == 0) {
-        sys_tick_timer_update(id, 100000);
-        state++;
-    } else {
-        sys_tick_timer_unregister(id);
-        state--;
-    }
-    TOGGLE(LED_RED);
+void sys_tick_timer_callback_one_shot(int id)
+{
+	static int state;
+	if (state == 0) {
+		sys_tick_timer_update(id, 100000);
+		state++;
+	} else {
+		sys_tick_timer_unregister(id);
+		state--;
+	}
+	TOGGLE(LED_RED);
 }
 
 /**
  * Sys Tick soft timer test main function
  */
-int main(void) {
-    uint32_t timer;
+int main(void){
+	uint32_t timer;
 
-    mcu_init();
-    led_init();
-    sys_tick_init();
+	mcu_init();
+	led_init();
+	sys_tick_init();
 
-    (void)sys_tick_timer_register(sys_tick_timer_callback, 1000000);
+	(void)sys_tick_timer_register(sys_tick_timer_callback, 1000000);
 
-    while (true) {
-        timer = sys_tick_get_timer();
-        while (!sys_tick_check_timer(timer, 50000)) {
-            __asm("nop");
-        }
-        TOGGLE(LED_GREEN);
-    }
+	while (true) {
+		timer = sys_tick_get_timer();
+		while (!sys_tick_check_timer(timer, 50000)) {
+			__asm("nop");
+		}
+		TOGGLE(LED_GREEN);
+	}
 }

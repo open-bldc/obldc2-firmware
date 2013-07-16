@@ -31,49 +31,53 @@
 #include "driver/usart.h"
 
 uint8_t buffer[5];
-int buffer_fill = 0;
-bool buffer_full = false;
+int buffer_fill;
+bool buffer_full;
 
 /**
  * USART byte handler function
  */
-int usart_handle_byte(uint8_t byte) {
-    if (!buffer_full) {
-        buffer[buffer_fill++] = byte;
-        if (buffer_fill == 5) {
-            buffer_full = true;
-            usart_enable_send();
-        }
-    } else {
-        return -1;
-    }
-    return 0;
+int usart_handle_byte(uint8_t byte)
+{
+	if (!buffer_full) {
+		buffer[buffer_fill++] = byte;
+		if (buffer_fill == 5) {
+			buffer_full = true;
+			usart_enable_send();
+		}
+	} else {
+		return -1;
+	}
+	return 0;
 }
 
 /**
  * USART byte send handler function
  */
-int32_t usart_get_byte(void) {
-    int32_t ret = -1;
+int32_t usart_get_byte(void)
+{
+	int32_t ret = -1;
 
-    if (buffer_full) {
-        ret = buffer[--buffer_fill];
-        if (buffer_fill == 0) {
-            buffer_full = false;
-        }
-    }
+	if (buffer_full) {
+		ret = buffer[--buffer_fill];
+		if (buffer_fill == 0) {
+			buffer_full = false;
+		}
+	}
 
-    return ret;
+	return ret;
 }
 
 /**
  * USART driver test main function
  */
-int main(void) {
+int main(void)
+{
+	mcu_init();
+	led_init();
+	usart_init(usart_handle_byte, usart_get_byte);
 
-    mcu_init();
-    led_init();
-    usart_init(usart_handle_byte, usart_get_byte);
-
-    while (1) __asm("nop");
+	while (1) {
+		__asm("nop");
+	}
 }

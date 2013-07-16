@@ -35,32 +35,34 @@ static void timer_callback(int id, uint16_t time);
 /**
  * Callback from the timer to disable the led.
  */
-void timer_callback_off(__attribute__((unused)) int id, __attribute__((unused)) uint16_t time) {
-    OFF(LED_RED);
+void timer_callback_off(int id, uint16_t time)
+{
+	OFF(LED_RED);
 }
 
 /**
  * Callback from the timer to enable the led.
  */
-void timer_callback_on(__attribute__((unused)) int id, __attribute__((unused)) uint16_t time) {
-    ON(LED_RED);
+void timer_callback_on(int id, uint16_t time)
+{
+	ON(LED_RED);
 
-    timer_register(100, timer_callback_off, true);
+	timer_register(100, timer_callback_off, true);
 }
 
 /**
  * Sys Tick soft timer test main function
  */
-int main(void) {
+int main(void)
+{
+	mcu_init();
+	led_init();
+	timer_init();
 
-    mcu_init();
-    led_init();
-    timer_init();
+	/* 1kHz timer callback. */
+	(void)timer_register(4000, timer_callback_on, false);
 
-    /* 1kHz timer callback. */
-    (void)timer_register(4000, timer_callback_on, false);
-
-    while (true) {
-        __asm("nop");
-    }
+	while (true) {
+		__asm("nop");
+	}
 }

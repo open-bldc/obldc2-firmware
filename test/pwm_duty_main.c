@@ -37,11 +37,12 @@
  *
  * @param delay "time" to wait
  */
-static void my_delay(uint32_t delay) {
-    while (delay != 0) {
-        delay--;
-        __asm("nop");
-    }
+static void my_delay(uint32_t delay)
+{
+	while (delay != 0) {
+		delay--;
+		__asm("nop");
+	}
 }
 
 /**
@@ -49,34 +50,35 @@ static void my_delay(uint32_t delay) {
  *
  * @return Nothing really...
  */
-int main(void) {
-    int16_t pwm_duty = 0;
-    int dir = 1;
-    int increment = 0xF;
+int main(void)
+{
+	int16_t pwm_duty = 0;
+	int dir = 1;
+	int increment = 0xF;
 
-    mcu_init();
-    led_init();
-    pwm_init();
+	mcu_init();
+	led_init();
+	pwm_init();
 
-    /* Set PWM to 0% duty. */
-    pwm_set(pwm_duty);
+	/* Set PWM to 0% duty. */
+	pwm_set(pwm_duty);
 
-    /* Commutate to enable PWM output. */
-    pwm_comm();
+	/* Commutate to enable PWM output. */
+	pwm_comm();
 
-    /* Sweep the duty cycle between -100% and +100% */
-    while (true) {
-        pwm_duty += increment * dir;
+	/* Sweep the duty cycle between -100% and +100% */
+	while (true) {
+		pwm_duty += increment * dir;
 
-        if (pwm_duty == INT16_MAX) {
-            dir = -1;
-        } else if (pwm_duty == INT16_MIN) {
-            dir = 1;
-        }
+		if (pwm_duty == INT16_MAX) {
+			dir = -1;
+		} else if (pwm_duty == INT16_MIN) {
+			dir = 1;
+		}
 
-        pwm_set(pwm_duty);
+		pwm_set(pwm_duty);
 
-        my_delay(5000);
-        TOGGLE(LED_RED);
-    }
+		my_delay(5000);
+		TOGGLE(LED_RED);
+	}
 }

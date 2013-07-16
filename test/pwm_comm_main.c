@@ -37,11 +37,12 @@
  *
  * @param delay "time" to wait
  */
-static void my_delay(uint32_t delay) {
-    while (delay != 0) {
-        delay--;
-        __asm("nop");
-    }
+static void my_delay(uint32_t delay)
+{
+	while (delay != 0) {
+		delay--;
+		__asm("nop");
+	}
 }
 
 /**
@@ -49,19 +50,19 @@ static void my_delay(uint32_t delay) {
  *
  * @return Nothing really...
  */
-int main(void) {
+int main(void)
+{
+	mcu_init();
+	led_init();
+	pwm_init();
 
-    mcu_init();
-    led_init();
-    pwm_init();
+	/* Set PWM to 10% positive power. */
+	pwm_set(INT16_MAX/10);
 
-    /* Set PWM to 10% positive power. */
-    pwm_set(INT16_MAX/10);
-
-    /* Continously commutate. With some arbitrary frequency. */
-    while (true) {
-        pwm_comm();
-        my_delay(100000);
-        TOGGLE(LED_RED);
-    }
+	/* Continously commutate. With some arbitrary frequency. */
+	while (true) {
+		pwm_comm();
+		my_delay(100000);
+		TOGGLE(LED_RED);
+	}
 }
